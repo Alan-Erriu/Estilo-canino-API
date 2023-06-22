@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import turnsRoutes from "./routes/turns.routes";
 import authRoutes from "./routes/auth.routes";
+import dogRoutes from "./routes/dog.routes";
 import { createRoles } from "./libs/initialSetup";
 const app = express();
 
@@ -15,5 +16,6 @@ app.get("/", (req, res) => {
 
 app.use("/turns", turnsRoutes);
 app.use("/auth", authRoutes);
+app.use("/dog", dogRoutes);
 
 export default app;
