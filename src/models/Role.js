@@ -8,5 +8,5 @@ const roleSchema = new Schema(
     versionKey: false,
   }
 );
-
+export const ROLES = ["cliente", "peluquero", "administrador"];
 export default model("Role", roleSchema);

@@ -1,7 +1,7 @@
-import User from "../models/user";
+import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import dotEnv from "dotenv";
-import Role from "../models/role";
+import Role from "../models/Role";
 
 dotEnv.config();
 //registrarse y obtener token
@@ -22,12 +22,9 @@ export const signUp = async (req, res) => {
       newUser.role = [role._id];
     }
     const savedUser = await newUser.save();
-    const token = jwt.sign({ id: savedUser._id }, process.env.SECRET, {
-      expiresIn: 86400,
-    });
 
     console.log(newUser);
-    res.status(200).json({ token });
+    res.status(200).json({ message: "Usuario registrado con exito" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al registrar el usuario" });
@@ -60,8 +57,8 @@ export const signIn = async (req, res) => {
     const token = jwt.sign({ id: userFound._id }, process.env.SECRET, {
       expiresIn: 86400, // 24 horas
     });
-
-    res.json({ token });
+    const { name, age, userId, role } = userFound;
+    res.json({ token, name, age, userId, role });
     console.log(matchPassword);
   } catch (error) {
     console.log(error);

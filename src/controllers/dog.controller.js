@@ -9,8 +9,8 @@ export const createDog = async (req, res) => {
       breed,
       owner: req.userId, // previamente se guardo el id con el uso de verifyToken- nunca funcionara sin este.
     });
-    const savedDog = await newDog.save();
-    res.status(201).json({ message: "Dog successfully created" });
+    const dog = await newDog.save();
+    res.status(201).json({ message: "Dog successfully created", dog });
   } catch (error) {
     console.error(error);
 

@@ -1,4 +1,4 @@
-import Role from "../models/role";
+import Role from "../models/Role.js";
 
 //se crean 3 roles por defecto "cliente", "pelquero" y "administrador".
 export const createRoles = async () => {
