@@ -1,4 +1,4 @@
-import Dog from "../models/dog";
+import Dog from "../models/Dog";
 //crear un nuevo perro asocioado a un dueño, este es obtenido por el middleware verifyToken----------------------------------------------------
 export const createDog = async (req, res) => {
   try {

@@ -1,15 +1,77 @@
 import Turn from "../models/Turn.js";
+import moment from "moment";
 
 // el cliente crea un nuevo turno-------------------------
 export const createTurnByClient = async (req, res) => {
   try {
-    const { startDateTime, groomer, dog, client } = req.body;
+    const { date, month, year, day, time, groomer, dog, client } = req.body;
+    //convierte los inputs del usario a un formato que la librerìa moment entienda YYYY-MM-DD HH:mm
+    const selectedDateTime = moment(`${year}-${month}-${date} ${time}`);
+    //consulta el momento actual  ej:2023-06-27 10:00
+    const currentDateTime = moment();
+    //pregunta si la fecha ingresada por el usuario es valida
+    if (!selectedDateTime.isValid()) {
+      return res.status(400).json({ message: "Invalid date and time" });
+    }
+    //consulta si la fecha ingresada por el usuario es anterior al momento actual, no se puede resevar un turno para una fecha pasada
+    if (selectedDateTime.isBefore(currentDateTime)) {
+      return res
+        .status(400)
+        .json({ message: "Selected date and time is in the past" });
+    }
+    // Verificar si existen citas para el perro y el peluquero en el mismo día y horario
+    const existingTurns = await Turn.find({
+      date,
+      month,
+      year,
+      day,
+      time,
+      groomer,
+      dog,
+    });
+
+    if (existingTurns.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Turn already exists for the given date and time" });
+    }
+
+    // Verificar si hay un turno anterior al horario deseado
+    const previousTurn = await Turn.findOne({
+      day,
+      time: { $lt: time },
+      groomer,
+    }).sort({ time: -1 });
+
+    if (previousTurn) {
+      // Calcular la diferencia de tiempo entre el turno anterior y el turno deseado
+      const previousTime = parseInt(previousTurn.time.replace(":", ""));
+      const currentTime = parseInt(time.replace(":", ""));
+      const minTimeDiff = 100; // 1 hora en formato HH:mm (por ejemplo, 09:00)
+
+      if (previousTime >= currentTime) {
+        return res.status(400).json({
+          message: "Cannot schedule a turn within 1 hour of the previous turn",
+        });
+      }
+
+      if (previousTime + minTimeDiff > currentTime) {
+        return res.status(400).json({
+          message: "Cannot schedule a turn within 1 hour of the previous turn",
+        });
+      }
+    }
 
     const turn = new Turn({
-      startDateTime,
+      date,
+      month,
+      year,
+      day,
+      time,
       groomer,
       dog,
       client,
+      availability: false,
     });
 
     const savedTurn = await turn.save();
@@ -20,59 +82,50 @@ export const createTurnByClient = async (req, res) => {
     return res.status(500).json({ message: "Error creating turn" });
   }
 };
-// buscar un turno por id--------------------------
-export const getTurnById = async (req, res) => {
+
+export const getAvailableTurnsByDate = async (req, res) => {
   try {
-    const turnId = req.params.turnId;
-    const turn = await Turn.findOne({ _id: turnId });
+    const { date, month, year, day, groomerId } = req.body;
 
-    if (!turn) {
-      return res.status(404).json({ message: "Turn not found" });
-    }
+    // Realizar una consulta para obtener las citas reservadas para el día y el peluquero específico
+    const appointments = await Turn.find({
+      date,
+      month,
+      year,
+      day,
+      groomer: groomerId,
+    });
 
-    res.status(200).json({ message: "Turn found", turn });
+    // Generar una lista de horarios disponibles para el día seleccionado
+    const allSlots = [
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+    ];
+
+    // Eliminar los horarios que ya están reservados
+    const reservedSlots = appointments.map((appointment) => appointment.time);
+    const availableSlots = allSlots.filter(
+      (slot) => !reservedSlots.includes(slot)
+    );
+
+    // Obtener la hora actual
+    const currentTime = moment();
+
+    // Filtrar los horarios futuros
+    const futureSlots = availableSlots.filter((slot) => {
+      const slotTime = moment(slot, "HH:mm");
+      return slotTime.isAfter(currentTime);
+    });
+
+    // Retornar los horarios disponibles al cliente
+    return res.status(200).json({ futureSlots });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-// obtener todos los turnos, ordenados por peluqueros (solo el admin puede)------------
-export const getAllTurnsByPeluquero = async (req, res) => {
-  try {
-    const turns = await Turn.find().populate("groomer", "name");
-
-    res.status(200).json({ message: "Turns found", turns });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const getTurns = (req, res) => {};
-export const UpdateTurnById = (req, res) => {};
-
-// Cliente elimina un turno suyo
-export const deleteTurnById = async (req, res) => {
-  try {
-    const turnId = req.params.turnId;
-    const userId = req.userId;
-
-    const turn = await Turn.findOne({ _id: turnId });
-
-    if (!turn) {
-      return res.status(404).json({ message: "Turn not found" });
-    }
-
-    // Verificar si el usuario que realiza la solicitud tiene permiso para eliminar el turno
-    if (turn.client.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized" });
-    }
-
-    await turn.deleteOne();
-
-    res.json({ message: "Turn successfully removed" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Error getting available turns" });
   }
 };

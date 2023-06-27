@@ -13,8 +13,8 @@ router.post(
   [verifyToken, isAdministrador, checkExistingRole],
   userCtrl.createUser
 );
-//obtener todos los usuarios, solo van a poder los admin
-router.get("/all", [verifyToken, isAdministrador], userCtrl.getAllUsers);
+//obtener todos los usuarios
+router.get("/all", verifyToken, userCtrl.getAllUsers);
 
 //obtener un usuario por id
 router.get("/", verifyToken, userCtrl.getUserById);

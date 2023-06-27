@@ -8,6 +8,10 @@ dotEnv.config();
 export const signUp = async (req, res) => {
   try {
     const { name, email, password, age, role } = req.body;
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      return res.status(400).json({ message: "user already exists" });
+    }
     const newUser = new User({
       name: name,
       email: email,
@@ -23,7 +27,7 @@ export const signUp = async (req, res) => {
     }
     const savedUser = await newUser.save();
 
-    console.log(newUser);
+    console.log(savedUser);
     res.status(200).json({ message: "Usuario registrado con exito" });
   } catch (error) {
     console.error(error);
@@ -39,8 +43,7 @@ export const signIn = async (req, res) => {
       "role"
     );
 
-    if (!userFound)
-      return res.status(400).json({ message: "No se encontró el usuario" });
+    if (!userFound) return res.status(400).json({ message: "no user found" });
 
     const matchPassword = await User.comparePassword(
       req.body.password,
@@ -50,7 +53,7 @@ export const signIn = async (req, res) => {
     if (!matchPassword) {
       return res.status(401).json({
         token: null,
-        message: "Contraseña incorrecta",
+        message: "incorrect password",
       });
     }
 
