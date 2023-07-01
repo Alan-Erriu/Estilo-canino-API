@@ -17,16 +17,17 @@ var app = (0, _express["default"])();
 var options = {
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "X-Access-Token", "Authorization"],
   credentials: true,
-  origin: "*",
+  origin: ["https://estilocanino.netlify.app", "http://localhost:5173"],
   preflightContinue: false
 };
 app.use((0, _cors["default"])(options));
-// se crean los roles en la base de datos al inciar la aplicacion
+
+// Se crean los roles en la base de datos al iniciar la aplicación
 (0, _initialSetup.createRoles)();
 app.use((0, _morgan["default"])("dev"));
 app.use(_express["default"].json());
 app.get("/", function (req, res) {
-  res.json("welcolme to Estilo Canino");
+  res.json("Welcome to Estilo Canino");
 });
 app.use("/turn", _turn["default"]);
 app.use("/auth", _auth["default"]);
