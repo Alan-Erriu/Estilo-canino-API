@@ -86,7 +86,7 @@ export const createTurnByClient = async (req, res) => {
 export const getAvailableTurnsByDate = async (req, res) => {
   try {
     const { date, month, year, day, groomerId } = req.body;
-
+    console.log(date, month, year, day, groomerId);
     // Realizar una consulta para obtener las citas reservadas para el día y el peluquero específico
     const appointments = await Turn.find({
       date,
@@ -116,16 +116,103 @@ export const getAvailableTurnsByDate = async (req, res) => {
     // Obtener la hora actual
     const currentTime = moment();
 
-    // Filtrar los horarios futuros
-    const futureSlots = availableSlots.filter((slot) => {
-      const slotTime = moment(slot, "HH:mm");
-      return slotTime.isAfter(currentTime);
-    });
-
     // Retornar los horarios disponibles al cliente
-    return res.status(200).json({ futureSlots });
+
+    return res.status(200).json({ availableSlots });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error getting available turns" });
+  }
+};
+// trae todos los turnos ordenados de menor a mayor (fecha)
+export const getAllTurns = async (req, res) => {
+  try {
+    const turns = await Turn.find().sort({ year: 1, month: 1, date: 1 });
+
+    return res.status(200).json(turns);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error getting turns" });
+  }
+};
+//
+
+export const getAppointmentsByGroomerAndDate = async (req, res) => {
+  try {
+    const { groomerId, date, month, year } = req.body;
+
+    // Busca los turnos en la base de datos para el peluquero y fecha especificados
+    const appointments = await Turn.find({
+      groomer: groomerId,
+      date: date,
+      month: month,
+      year: year,
+    })
+      .populate("dog", "name")
+      .populate("client", "name")
+      .populate("groomer", "name");
+
+    res.json(appointments);
+  } catch (error) {
+    console.error("Error al obtener los turnos:", error);
+    res.status(500).json({ error: "Error al obtener los turnos" });
+  }
+};
+// todos los turnos por  cliente especifico
+export const getAppointmentsByClientId = async (req, res) => {
+  try {
+    const { clientId } = req.body;
+
+    // Busca los turnos en la base de datos para el peluquero y fecha especificados
+    const appointments = await Turn.find({
+      client: clientId,
+    })
+      .populate("dog", "name")
+      .populate("client", "name")
+      .populate("groomer", "name");
+
+    res.json(appointments);
+  } catch (error) {
+    console.error("Error al obtener los turnos:", error);
+    res.status(500).json({ error: "Error al obtener los turnos" });
+  }
+};
+//todos los turnos por  perro especifico
+export const getAppointmentsByDogId = async (req, res) => {
+  try {
+    const { dogId } = req.body;
+
+    // Busca los turnos en la base de datos para el peluquero y fecha especificados
+    const appointments = await Turn.find({
+      dog: dogId,
+    })
+      .populate("dog", "name")
+      .populate("client", "name")
+      .populate("groomer", "name");
+
+    res.json(appointments);
+  } catch (error) {
+    console.error("Error al obtener los turnos:", error);
+    res.status(500).json({ error: "Error al obtener los turnos" });
+  }
+};
+
+//borrar un turno por id
+
+export const deleteTurnById = async (req, res) => {
+  try {
+    const { _id } = req.params;
+
+    // Buscar y eliminar el turno por su ID
+    const deletedTurn = await Turn.findByIdAndDelete(_id);
+
+    if (!deletedTurn) {
+      return res.status(404).json({ message: "Turn not found" });
+    }
+
+    return res.status(200).json({ message: "Turn deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting turn:", error);
+    return res.status(500).json({ message: "Error deleting turn" });
   }
 };

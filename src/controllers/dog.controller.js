@@ -100,3 +100,17 @@ export const deleteDogById = async (req, res) => {
     res.status(500).json({ message: "server error" });
   }
 };
+
+//esta funcion es para cuando el administrador quiere crear un turno para cualquier peluquero y cualquier usuario
+export const getDogsByOwnerIdBody = async (req, res) => {
+  try {
+    const { ownerId } = req.body; // Obtén el ID del dueño del cuerpo de la solicitud
+
+    const dogs = await Dog.find({ owner: ownerId });
+
+    res.json({ dogs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

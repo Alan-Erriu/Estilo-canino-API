@@ -63,9 +63,17 @@ export const getUserById = async (req, res) => {
 
 export const deleteUserById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const userId = req.userId;
+    const { id } = req.body;
 
-    const deletedUser = await User.deleteOne(id);
+    // Verificar si el userId es igual al id que se está intentando eliminar
+    if (userId === id) {
+      return res
+        .status(403)
+        .json({ message: "You can't delete your own account" });
+    }
+
+    const deletedUser = await User.deleteOne({ _id: id });
 
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });

@@ -2,19 +2,20 @@ import { Router } from "express";
 import * as turnsCtrl from "../controllers/turn.controller";
 import { verifyToken, isAdministrador } from "../middlewares/authjwt";
 const router = Router();
-//obtener todos los turnos, ordenados por peluquero(solo el admin puede)
-// router.get(
-//   "/",
-//   [verifyToken, isAdministrador],
-//   turnsCtrl.getAllTurnsByPeluquero
-// );
-//obtener un turno por id de turno-------------------------------------------------
-router.get("/", verifyToken, turnsCtrl.getAvailableTurnsByDate);
-//el cliente solicita un nuevo turno---------------------------------------
-router.post("/", verifyToken, turnsCtrl.createTurnByClient);
 
-// // router.put("/:turnId", turnsCtrl.UpdateTurnById);
-// router.delete("/:turnId", verifyToken, turnsCtrl.deleteTurnById);
-// router.post("/available", verifyToken, turnsCtrl.getAvailableTurnsForWeek);
+//obtener un turno por id de turno-------------------------------------------------
+router.post("/", verifyToken, turnsCtrl.getAvailableTurnsByDate);
+//el cliente solicita un nuevo turno---------------------------------------
+router.post("/create", verifyToken, turnsCtrl.createTurnByClient);
+//obtener todos los turnos por fecha de menor a mayor (fecha)
+router.get("/turns", verifyToken, turnsCtrl.getAllTurns);
+//traer todos los turnos por fecha y peluquero especifico
+router.post("/alls", verifyToken, turnsCtrl.getAppointmentsByGroomerAndDate);
+//traer todos los turnos por id de cliente especifico
+router.post("/allclient", verifyToken, turnsCtrl.getAppointmentsByClientId);
+//traer todos los turnos por perro id especifico
+router.post("/alldog", verifyToken, turnsCtrl.getAppointmentsByDogId);
+//borar un turno por id
+router.delete("/:_id", verifyToken, turnsCtrl.deleteTurnById);
 
 export default router;

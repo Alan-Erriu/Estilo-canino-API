@@ -43,7 +43,7 @@ export const signIn = async (req, res) => {
       "role"
     );
 
-    if (!userFound) return res.status(400).json({ message: "no user found" });
+    if (!userFound) return res.status(404).json({ message: "no user found" });
 
     const matchPassword = await User.comparePassword(
       req.body.password,
@@ -61,10 +61,10 @@ export const signIn = async (req, res) => {
       expiresIn: 86400, // 24 horas
     });
     const { name, age, userId, role } = userFound;
-    res.json({ token, name, age, userId, role });
+    res.status(200).json({ token, name, age, userId, role });
     console.log(matchPassword);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: "Server Error" });
   }
 };
