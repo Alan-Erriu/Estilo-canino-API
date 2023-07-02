@@ -1,5 +1,5 @@
 import app from "./app";
-import connect from "./database";
+import connect from "./dataBase";
 
 connect();
 
