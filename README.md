@@ -19,25 +19,25 @@ Es la persona que utiliza la aplicación, capaz crear perros , editarlos y borra
 **Atributos**
 
 |  Nombre  |  Tipo  |
-| :------: | :----: | --------------- |
-|   \_id   | string |
+| :------: | :----: |
+|    id    | string |
 |   name   | string |
 |  email   | string |
 | password | string |
 |   age    | string |
-|   role   |  ref   | ref modelo Role |
+|   role   |  ref   |
 
 #### 2. Dog
 
 **Atributos**
 
 | Nombre |  Tipo  |
-| :----: | :----: | --------------- |
-|  \_id  | string |
+| :----: | :----: |
+|   id   | string |
 |  name  | string |
 |  age   | string |
 | breed  | string |
-| owner  |  -id   | ref modelo User |
+| owner  |   id   |
 
 #### 3. Role
 
