@@ -15,6 +15,9 @@ Las clases que maneja estilo canino para administrar sus usuarios son las siguie
 #### 1. User
 
 Es la persona que utiliza la aplicación, capaz crear perros , editarlos y borrarlos, iniciar sesión y evidentemente, registrarse.
+Tambien estan los usuarios de tipo peluquero y administrador. Todos son capaces de registrar un nuevo turno.
+Los usuarios de tipo administrador tiene acceso a edpoints que los otros no.
+
 
 **Atributos**
 
