@@ -87,6 +87,7 @@ En el body de la request:
     password: string
 }
 
+```
 
 |   Caso    | Status |             Respuesta              |
 | :-------: | :----: | :--------------------------------: |
@@ -96,9 +97,9 @@ En el body de la request:
 |   Fallo   |  500   | { message: 'Server Error' } |
 
 
-##### Crear un usuario
+   #### 2.  Crear un usuario
 
-##### `POST /auth/signup`
+   ##### `POST /auth/signup`
 
 En el body de la request:
 
@@ -130,10 +131,291 @@ En el body de la request:
     breed: string
     ownweId: se crea con el id guardado en jwt
 }
+```
+
+##### `GET /dog/id`
+
+espera un id de perro en el params y devuelve un dog
+
+|   Caso    | Status |          Respuesta           |
+| :-------: | :----: | :--------------------------: |
+|   Exito   |  200   |           { dog }            |
+| Not Found |  404   | { message: 'dog not found' } |
+|   Fallo   |  500   | { message: 'Server Error' }  |
+
+##### `GET /dog`
+
+espera un id que es obtenido mediante el middleware verifyToken, retorna todos los dogs asociados al dueño
+
+| Caso  | Status |          Respuesta          |
+| :---: | :----: | :-------------------------: |
+| Exito |  200   |          { dogs }           |
+| Fallo |  500   | { message: 'Server Error' } |
+
+##### `GET /dog/alldogs`
+
+En el body de la request:
+
+```js
+{
+  ownweId: string;
+}
+```
+
+esta funcion es para cuando el administrador quiere crear un turno para cualquier peluquero y cualquier usuario
+
+| Caso  | Status |          Respuesta          |
+| :---: | :----: | :-------------------------: |
+| Exito |  200   |          { dogs }           |
+| Fallo |  500   | { message: 'Server Error' } |
+
+##### `PUT /dog/dogID`
+
+En el body de la request:
+
+```js
+{
+
+    name: string,
+    age: string
+    breed: string
+
+}
+```
+
+el id del dueño es obtenido mediante el token
+
+| Caso  | Status |          Respuesta          |
+| :---: | :----: | :-------------------------: |
+| Exito |  200   | 'Dog updated successfully'  |
+| Fallo |  500   | { message: 'Server Error' } |
+
+##### `DELETE /dog/dogID`
+
+espera el id del perro por params y el id del dueño es obtenido mediante el token
+
+|   Caso    | Status |          Respuesta          |
+| :-------: | :----: | :-------------------------: |
+|   Exito   |  200   | 'Dog updated successfully'  |
+| Not Found |  404   |       'dog not found'       |
+|   Fallo   |  500   | { message: 'Server Error' } |
+
+#### 3. Acciones de turnos
+
+##### Crear un nuevo turno
+
+##### `POST /turn/create`
+
+En el body de la request:
+
+```js
+{
+date: string,
+ month:string    ,
+year: string,
+day:string,
+time:string,
+groomer:string,
+dog:string,
+client:string
 
 
-#####  `GET /dog`
+}
+```
 
+| Caso  | Status |                          Respuesta                          |
+| :---: | :----: | :---------------------------------------------------------: |
+| Exito |  200   |                        '{savedTurn}'                        |
+| Fallo |  400   |                   'Invalid date and time'                   |
+| Fallo |  400   |           'Selected date and time is in the past'           |
+| Fallo |  400   |      'Turn already exists for the given date and time'      |
+| Fallo |  400   | 'Cannot schedule a turn within 1 hour of the previous turn' |
+| Fallo |  500   |                    'Error creating turn'                    |
+
+##### Consuta turnos disponibles por peluqueroid
+
+##### `POST /turn`
+
+En el body de la request:
+
+```js
+{
+date: string,
+ month:string,
+year: string,
+day:string,
+time:string,
+groomerID:string,
+
+}
+```
+
+// Generar una lista de horarios disponibles para el día seleccionado
+const allSlots = [
+"09:00",
+"10:00",
+"11:00",
+"12:00",
+"13:00",
+"14:00",
+"15:00",
+];
+Realizar una consulta para obtener las citas reservadas para el día y el peluquero específico
+Eliminar los horarios que ya están reservados
+
+| Caso  | Status |            Respuesta            |
+| :---: | :----: | :-----------------------------: |
+| Exito |  200   |        {availableSlots}         |
+| Fallo |  500   | 'Error getting available turns' |
+
+##### Consulta todos los tunos de menor a mayor fecha
+
+##### `GEt /turn/turns`
+
+| Caso  | Status |       Respuesta       |
+| :---: | :----: | :-------------------: |
+| Exito |  200   |        {Turns}        |
+| Fallo |  500   | 'Error getting turns' |
+
+##### Consulta todos los tunos de menor a mayor fecha
+
+##### `GEt /turn/alls`
+
+traer todos los turnos por fecha y peluquero especifico
+
+En el body de la request:
+
+```js
+{
+date: string,
+ month:string    ,
+year: string,
+groomerID:string,
+
+}
+```
+
+| Caso  | Status |       Respuesta       |
+| :---: | :----: | :-------------------: |
+| Exito |  200   |        {Turns}        |
+| Fallo |  500   | 'Error getting turns' |
+
+##### `POST /turn/allclient`
+
+traer todos los turnos por cliente especifico
+
+En el body de la request:
+
+```js
+{
+clientId: string,
+}
+```
+
+| Caso  | Status |       Respuesta       |
+| :---: | :----: | :-------------------: |
+| Exito |  200   |        {Turns}        |
+| Fallo |  500   | 'Error getting turns' |
+
+##### `POST /turn/alldog`
+
+todos los turnos por perro especifico
+
+En el body de la request:
+
+```js
+{
+dogId: string,
+}
+```
+
+| Caso  | Status |       Respuesta       |
+| :---: | :----: | :-------------------: |
+| Exito |  200   |        {Turns}        |
+| Fallo |  500   | 'Error getting turns' |
+
+##### `DELETE /turn/dogId`
+
+borra un turno por id
+
+|   Caso    | Status |          Respuesta          |
+| :-------: | :----: | :-------------------------: |
+|   Exito   |  200   | 'Turn deleted successfully' |
+| Not Found |  404   |      'Turn not found'       |
+|   Fallo   |  500   |    'Error deleting turn'    |
+
+#### 4. Acciones de Users
+
+##### Crear un nuevo usuario con rol peluquero hay que tener rol administrador para poder pasar el middleware
+
+##### `POST /user`
+
+```js
+{
+
+ name:string,
+ email:string,
+ password:string,
+age:string,
+role: [string]
+}
+```
+
+| Caso  | Status |       Respuesta       |
+| :---: | :----: | :-------------------: |
+| Exito |  200   |      'New user'       |
+| Fallo |  500   | 'Error creating user' |
+
+##### `POST /user/all`
+
+trae todos los usuarios sin filtra por roles
+
+|   Caso    | Status |        Respuesta         |
+| :-------: | :----: | :----------------------: |
+|   Exito   |  200   |         'Users'          |
+| Not Found |  500   | 'Error retrieving users' |
+
+##### `GET /user`
+
+se usa el id guardado en token para obtener la informacion del usuario
+
+|   Caso    | Status |        Respuesta         |
+| :-------: | :----: | :----------------------: |
+|   Exito   |  200   |         'Users'          |
+| Not Found |  404   |     'User not found'     |
+|   Fallo   |  500   | 'Error retrieving users' |
+
+##### `PUT /user/id`
+
+no todos los datos son necesarios, de no mandar alguno se conserva sus antiguos valores
+el id se obtiene mediante el token (middleware verifyToken)
+
+```js
+{
+
+ name:string,
+ email:string,
+ password:string,
+age:string,
+}
+```
+
+##### `DELETE /user`
+
+borrar un usuario por el id ingresado por body
+
+```js
+{
+
+ id:string,
+}
+```
+
+|   Caso    | Status |              Respuesta              |
+| :-------: | :----: | :---------------------------------: |
+|   Exito   |  200   |     'User deleted successfully'     |
+| Not Found |  404   |          'User not found'           |
+|   Fallo   |  403   | 'You can't delete your own account' |
+|   Fallo   |  500   |        'Error deleting user'        |
 
 <hr />
-```
