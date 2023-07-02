@@ -8,6 +8,10 @@
 
 **Estilo Canino** es una APP de peluquería canina donde podes registrar a tus perros y solicitar un turno con un peluquero. En este repositorio se encuentra la API REST con la cual el frontend obtiene toda la información de usuarios, sus respectivos perros y turnos conectada a mongoDB.
 
+Tambien podes ser un usuario del tipo peluquero y dar turnos a usuarios del tipo cliente.
+
+Por ultimo esta el usuario de tipo administrador. Este es capas de ver todos los usuarios del tipo cliente y peluquero, puede eliminar a cualquiera, solo el puede registrar usuarios del tipo peluquero, puede agendar un turno para cualquier usuario con cualquier peluquero, puede ver todos los turnos regitrados filtrando por fecha y peluquero.
+
 ## Modelo de clases
 
 Las clases que maneja estilo canino para administrar sus usuarios son las siguientes:
